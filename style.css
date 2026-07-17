@@ -167,8 +167,8 @@ img,
 
 .profile-avatar-wrapper {
   position: relative;
-  width: 105px;
-  height: 155px;
+  width: 90px;
+  height: 160px;
   border-radius: 4px;
   overflow: hidden;
   transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -191,7 +191,7 @@ img,
   font-weight: 700;
   text-align: center;
   transition: color 0.2s ease;
-  width: 100px;
+  width: 90px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
