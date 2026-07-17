@@ -284,42 +284,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // --- Simulated Download / Acessar Loader Action ---
+  // ALWAYS shows the lead capture modal first (regardless of button text),
+  // then redirects to the actual URL after the user fills in their Instagram.
   function triggerSimulatedAction(btnElement, targetUrl, originalText, bypassLead = false) {
-    const isDownload = originalText.toLowerCase().includes("baixar") || 
-                       originalText.toLowerCase().includes("luts") ||
-                       originalText.toLowerCase().includes("download");
-                       
-    // Intercept with Lead Capture Form first if it is a download and we haven't bypassed it yet
-    if (isDownload && !bypassLead) {
+    // Intercept with Lead Capture Form first (unless already bypassed after submit)
+    if (!bypassLead && targetUrl && targetUrl !== "#") {
       pendingDownload = { btnElement, targetUrl, originalText };
       openLeadModal();
       return;
     }
 
-    if (isDownload) {
-      btnElement.classList.add("loading");
-      btnElement.innerHTML = `Baixando...`;
-      
-      setTimeout(() => {
-        btnElement.classList.remove("loading");
-        btnElement.innerHTML = `✓ Concluído!`;
-        
-        setTimeout(() => {
-          window.open(targetUrl, "_blank");
-          setTimeout(() => {
-            btnElement.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> ${originalText}`;
-          }, 1000);
-        }, 300);
-      }, 1200);
-    } else {
-      btnElement.classList.add("loading");
-      btnElement.innerHTML = `Abrindo...`;
-      setTimeout(() => {
-        btnElement.classList.remove("loading");
-        btnElement.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> ${originalText}`;
-        window.open(targetUrl, "_blank");
-      }, 600);
-    }
+    // After lead form submitted: animate and open the link
+    btnElement.classList.add("loading");
+    btnElement.innerHTML = `Abrindo...`;
+    setTimeout(() => {
+      btnElement.classList.remove("loading");
+      btnElement.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> ${originalText}`;
+      window.open(targetUrl, "_blank");
+    }, 700);
   }
 
   // --- Lead Modal Control ---
@@ -502,7 +484,8 @@ document.addEventListener("DOMContentLoaded", () => {
   
   downloadTriggerBtn.addEventListener("click", (e) => {
     e.preventDefault();
-    triggerSimulatedAction(downloadTriggerBtn, "#", "LUTs & Presets");
+    // Just switch to the downloads tab — don't trigger the lead form
+    document.querySelector('[data-tab="downloads"]').click();
   });
 
   // --- Inline Search Logic ---
@@ -604,14 +587,17 @@ document.addEventListener("DOMContentLoaded", () => {
     
     populateAdminSelects();
     renderAdminLinksList();
-    renderAdminLeadsList(); // Load leads
+    renderAdminLeadsList();
     
     if (focusOnNewProfile) {
       adminManageProfileSelect.value = "[new]";
     } else {
-      adminManageProfileSelect.value = "luts";
+      // Open the panel with the currently active profile pre-selected
+      adminManageProfileSelect.value = activeProfileKey || "luts";
+      adminProfileSelect.value = activeProfileKey || "luts";
     }
     syncManageProfileFields();
+    renderAdminLinksList(); // refresh links list to match the right profile
   }
 
   function closeAdminPanel() {
