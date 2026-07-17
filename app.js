@@ -80,6 +80,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const adminProfileAvatarUrl = document.getElementById("admin-profile-avatar-url");
   const adminProfileAlignLabel = document.getElementById("admin-profile-align-label");
   const adminProfileAlignSelect = document.getElementById("admin-profile-align-select");
+  const adminProfileFitLabel = document.getElementById("admin-profile-fit-label");
+  const adminProfileFitSelect = document.getElementById("admin-profile-fit-select");
   const adminSaveProfileBtn = document.getElementById("admin-save-profile-btn");
   const adminDeleteProfileBtn = document.getElementById("admin-delete-profile-btn");
   
@@ -128,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
           </div>`;
       } else if (profile.avatarType === "custom" && profile.avatarUrl) {
-        avatarWrapper.innerHTML = `<img class="profile-avatar" src="${convertGoogleDriveLink(profile.avatarUrl)}" alt="${profile.name}">`;
+        avatarWrapper.innerHTML = `<img class="profile-avatar" src="${convertGoogleDriveLink(profile.avatarUrl)}" alt="${profile.name}" style="object-fit: ${profile.avatarFit || 'cover'}; object-position: ${profile.avatarPosition || 'center'}; background-color: #000;">`;
       } else {
         avatarWrapper.innerHTML = `<div class="avatar-phone-style" style="background-color: #555555;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
@@ -189,8 +191,9 @@ document.addEventListener("DOMContentLoaded", () => {
       headerAvatarBox.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>`;
     } else if (profile.avatarType === "custom" && profile.avatarUrl) {
       headerAvatarBox.style.backgroundImage = `url('${convertGoogleDriveLink(profile.avatarUrl)}')`;
-      headerAvatarBox.style.backgroundSize = "cover";
-      headerAvatarBox.style.backgroundPosition = "center";
+      headerAvatarBox.style.backgroundSize = profile.avatarFit || "cover";
+      headerAvatarBox.style.backgroundPosition = profile.avatarPosition || "center";
+      headerAvatarBox.style.backgroundColor = "#000";
     } else {
       headerAvatarBox.style.backgroundColor = "#555555";
     }
@@ -600,6 +603,7 @@ document.addEventListener("DOMContentLoaded", () => {
       adminProfileIconSelect.value = "custom";
       adminProfileAvatarUrl.value = "";
       adminProfileAlignSelect.value = "center";
+      adminProfileFitSelect.value = "cover";
       
       adminDeleteProfileBtn.style.display = "none";
       toggleAvatarUrlField();
@@ -609,6 +613,7 @@ document.addEventListener("DOMContentLoaded", () => {
       adminProfileIconSelect.value = profile.avatarType || "custom";
       adminProfileAvatarUrl.value = profile.avatarUrl || "";
       adminProfileAlignSelect.value = profile.avatarPosition || "center";
+      adminProfileFitSelect.value = profile.avatarFit || "cover";
       
       const isCore = (profile.id === "luts" || profile.id === "mobile" || profile.id === "sony");
       adminDeleteProfileBtn.style.display = isCore ? "none" : "block";
@@ -624,11 +629,15 @@ document.addEventListener("DOMContentLoaded", () => {
       adminProfileAvatarUrlLabel.style.display = "block";
       adminProfileAlignSelect.style.display = "block";
       adminProfileAlignLabel.style.display = "block";
+      adminProfileFitSelect.style.display = "block";
+      adminProfileFitLabel.style.display = "block";
     } else {
       adminProfileAvatarUrl.style.display = "none";
       adminProfileAvatarUrlLabel.style.display = "none";
       adminProfileAlignSelect.style.display = "none";
       adminProfileAlignLabel.style.display = "none";
+      adminProfileFitSelect.style.display = "none";
+      adminProfileFitLabel.style.display = "none";
     }
   }
   
@@ -638,6 +647,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const iconVal = adminProfileIconSelect.value;
     const avatarUrlVal = adminProfileAvatarUrl.value.trim();
     const alignVal = adminProfileAlignSelect.value;
+    const fitVal = adminProfileFitSelect.value;
     
     if (!nameVal) {
       alert("Por favor, digite o nome do perfil!");
@@ -656,6 +666,7 @@ document.addEventListener("DOMContentLoaded", () => {
         avatarType: iconVal,
         avatarUrl: iconVal === "custom" ? convertGoogleDriveLink(avatarUrlVal) : "",
         avatarPosition: iconVal === "custom" ? alignVal : "center",
+        avatarFit: iconVal === "custom" ? fitVal : "cover",
         links: []
       };
       
@@ -670,6 +681,7 @@ document.addEventListener("DOMContentLoaded", () => {
       profiles[selectedKey].avatarType = iconVal;
       profiles[selectedKey].avatarUrl = iconVal === "custom" ? convertGoogleDriveLink(avatarUrlVal) : "";
       profiles[selectedKey].avatarPosition = iconVal === "custom" ? alignVal : "center";
+      profiles[selectedKey].avatarFit = iconVal === "custom" ? fitVal : "cover";
       
       window.saveProfilesData(profiles);
       alert("Perfil atualizado com sucesso!");
