@@ -134,6 +134,15 @@
         <label id="admin-profile-avatar-url-label" class="admin-label">URL da Imagem do Avatar</label>
         <input type="text" id="admin-profile-avatar-url" class="admin-input" placeholder="Ex: https://images.unsplash.com/...">
 
+        <label id="admin-profile-align-label" class="admin-label">Recorte / Alinhamento da Foto</label>
+        <select id="admin-profile-align-select" class="admin-select">
+          <option value="center">Centralizado (Padrão)</option>
+          <option value="top">Topo (Focar na parte de cima/cabeça)</option>
+          <option value="bottom">Base (Focar na parte de baixo)</option>
+          <option value="left">Esquerda (Focar no lado esquerdo)</option>
+          <option value="right">Direita (Focar no lado direito)</option>
+        </select>
+
         <button id="admin-save-profile-btn" class="admin-btn">Salvar / Criar Perfil</button>
         <button id="admin-delete-profile-btn" class="admin-btn admin-btn-secondary" style="margin-top: 10px; background-color: #444; display: none;">Excluir Perfil</button>
       </div>

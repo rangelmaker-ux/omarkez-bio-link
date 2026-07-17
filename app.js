@@ -78,6 +78,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const adminProfileIconSelect = document.getElementById("admin-profile-icon-select");
   const adminProfileAvatarUrlLabel = document.getElementById("admin-profile-avatar-url-label");
   const adminProfileAvatarUrl = document.getElementById("admin-profile-avatar-url");
+  const adminProfileAlignLabel = document.getElementById("admin-profile-align-label");
+  const adminProfileAlignSelect = document.getElementById("admin-profile-align-select");
   const adminSaveProfileBtn = document.getElementById("admin-save-profile-btn");
   const adminDeleteProfileBtn = document.getElementById("admin-delete-profile-btn");
   
@@ -597,6 +599,7 @@ document.addEventListener("DOMContentLoaded", () => {
       adminProfileBio.value = "";
       adminProfileIconSelect.value = "custom";
       adminProfileAvatarUrl.value = "";
+      adminProfileAlignSelect.value = "center";
       
       adminDeleteProfileBtn.style.display = "none";
       toggleAvatarUrlField();
@@ -605,6 +608,7 @@ document.addEventListener("DOMContentLoaded", () => {
       adminProfileBio.value = profile.bio || "";
       adminProfileIconSelect.value = profile.avatarType || "custom";
       adminProfileAvatarUrl.value = profile.avatarUrl || "";
+      adminProfileAlignSelect.value = profile.avatarPosition || "center";
       
       const isCore = (profile.id === "luts" || profile.id === "mobile" || profile.id === "sony");
       adminDeleteProfileBtn.style.display = isCore ? "none" : "block";
@@ -618,9 +622,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isCustom) {
       adminProfileAvatarUrl.style.display = "block";
       adminProfileAvatarUrlLabel.style.display = "block";
+      adminProfileAlignSelect.style.display = "block";
+      adminProfileAlignLabel.style.display = "block";
     } else {
       adminProfileAvatarUrl.style.display = "none";
       adminProfileAvatarUrlLabel.style.display = "none";
+      adminProfileAlignSelect.style.display = "none";
+      adminProfileAlignLabel.style.display = "none";
     }
   }
   
@@ -629,6 +637,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const bioVal = adminProfileBio.value.trim();
     const iconVal = adminProfileIconSelect.value;
     const avatarUrlVal = adminProfileAvatarUrl.value.trim();
+    const alignVal = adminProfileAlignSelect.value;
     
     if (!nameVal) {
       alert("Por favor, digite o nome do perfil!");
@@ -646,6 +655,7 @@ document.addEventListener("DOMContentLoaded", () => {
         bio: bioVal,
         avatarType: iconVal,
         avatarUrl: iconVal === "custom" ? convertGoogleDriveLink(avatarUrlVal) : "",
+        avatarPosition: iconVal === "custom" ? alignVal : "center",
         links: []
       };
       
@@ -659,6 +669,7 @@ document.addEventListener("DOMContentLoaded", () => {
       profiles[selectedKey].bio = bioVal;
       profiles[selectedKey].avatarType = iconVal;
       profiles[selectedKey].avatarUrl = iconVal === "custom" ? convertGoogleDriveLink(avatarUrlVal) : "";
+      profiles[selectedKey].avatarPosition = iconVal === "custom" ? alignVal : "center";
       
       window.saveProfilesData(profiles);
       alert("Perfil atualizado com sucesso!");
