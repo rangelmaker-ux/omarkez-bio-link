@@ -1,6 +1,6 @@
 // Marx Bio Link - Dynamic Content Database
 
-const DB_VERSION = "v4_dynamic_profiles";
+const DB_VERSION = "v5_sony_cover";
 
 const DEFAULT_PROFILES = {
   luts: {
@@ -54,7 +54,10 @@ const DEFAULT_PROFILES = {
   sony: {
     id: "sony",
     name: "Sony ZV-E10 II",
-    avatarType: "camera",
+    avatarType: "custom",
+    avatarUrl: "assets/sony_zv10_cover.jpg",
+    avatarPosition: "center",
+    avatarFit: "cover",
     bio: "Configurações, lentes e acessórios para a Sony ZV-E10 Mark II.",
     links: [
       {
