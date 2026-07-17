@@ -38,13 +38,20 @@ body {
 }
 
 /* Global Image & Screen Sharpening rules */
-img, 
 .link-card-banner, 
 .result-thumb,
-.admin-link-item-thumb,
-.avatar-gradient-style {
+.admin-link-item-thumb {
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
+}
+
+/* Profile avatar images fill the full poster */
+img.profile-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
 /* App Container - Phone Viewport on Desktop */
@@ -118,12 +125,15 @@ img,
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: #000000;
+  background-color: #000;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   z-index: 1000;
+  overflow-y: auto;
+  padding: 60px 0 40px;
+  box-sizing: border-box;
   transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -134,27 +144,32 @@ img,
 }
 
 .profile-header {
-  position: absolute;
-  top: 50px;
   display: flex;
   justify-content: center;
   width: 100%;
+  margin-bottom: 0;
 }
 
 .profile-title {
-  font-size: 1.25rem;
-  font-weight: 500;
-  color: var(--text-main);
-  margin-bottom: 40px;
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 28px;
   text-align: center;
+  letter-spacing: 0.5px;
 }
 
+/* ── PROFILE GRID: Netflix poster row ── */
 .profile-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 30px;
-  padding: 0 40px;
-  max-width: 320px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+  flex-wrap: wrap;
 }
 
 .profile-card {
@@ -163,16 +178,24 @@ img,
   align-items: center;
   cursor: pointer;
   text-decoration: none;
+  gap: 8px;
+  /* Each card takes equal share, max ~130px poster width */
+  flex: 0 0 auto;
 }
 
+/* The poster image itself — true 9:16 */
 .profile-avatar-wrapper {
   position: relative;
-  width: 100px;
-  height: 100px;
-  border-radius: 6px;
+  width: 120px;
+  height: 213px; /* exact 9:16: 120 × (16/9) = 213px */
+  border-radius: 8px;
   overflow: hidden;
-  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border: 2px solid transparent;
+  transition: transform 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              border-color 0.22s ease,
+              box-shadow 0.22s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  background-color: #111;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -180,26 +203,27 @@ img,
 
 .profile-card:hover .profile-avatar-wrapper,
 .profile-card:active .profile-avatar-wrapper {
-  transform: scale(1.06);
-  border-color: var(--text-main);
+  transform: scale(1.05);
+  border-color: #fff;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.8);
 }
 
 .profile-name {
-  margin-bottom: 8px;
-  font-size: 0.82rem;
-  color: var(--text-main);
-  font-weight: 700;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.75);
+  font-weight: 600;
   text-align: center;
   transition: color 0.2s ease;
-  width: 100px;
+  width: 120px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  letter-spacing: 0.3px;
 }
 
 .profile-card:hover .profile-name,
 .profile-card:active .profile-name {
-  color: var(--text-main);
+  color: #fff;
 }
 
 /* Custom Avatars */
@@ -278,29 +302,29 @@ img,
 }
 
 .profile-add {
-  background-color: #111111;
-  border: 2px dashed #444444;
-  color: #444444;
+  background-color: rgba(255,255,255,0.04);
+  border: 2px dashed rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.3);
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .profile-add svg {
-  width: 32px;
-  height: 32px;
-  stroke: #444444;
+  width: 36px;
+  height: 36px;
+  stroke: rgba(255,255,255,0.25);
 }
 
 .manage-profiles-btn {
-  margin-top: 60px;
+  margin-top: 32px;
   background: transparent;
-  border: 1.5px solid var(--text-sub);
-  color: var(--text-sub);
-  padding: 8px 24px;
-  font-size: 0.8rem;
+  border: 1.5px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.45);
+  padding: 8px 28px;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   cursor: pointer;
   text-transform: uppercase;
   border-radius: 4px;
