@@ -167,9 +167,9 @@ img,
 
 .profile-avatar-wrapper {
   position: relative;
-  width: 90px;
-  height: 90px;
-  border-radius: 6px;
+  width: 105px;
+  height: 155px;
+  border-radius: 4px;
   overflow: hidden;
   transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border: 2px solid transparent;
@@ -185,9 +185,10 @@ img,
 }
 
 .profile-name {
-  margin-top: 12px;
-  font-size: 0.8rem;
-  color: var(--text-sub);
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+  color: var(--text-main);
+  font-weight: 700;
   text-align: center;
   transition: color 0.2s ease;
   width: 100px;

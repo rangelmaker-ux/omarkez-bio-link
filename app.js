@@ -132,7 +132,6 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (profile.avatarType === "custom" && profile.avatarUrl) {
         const img = document.createElement("img");
         img.className = "profile-avatar";
-        img.src = convertGoogleDriveLink(profile.avatarUrl);
         img.alt = profile.name;
         img.style.backgroundColor = "#000";
         img.style.objectPosition = profile.avatarPosition || "center";
@@ -140,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const savedFit = profile.avatarFit || "";
         img.style.objectFit = savedFit ? savedFit : "cover";
         
-        // Auto-fit landscape layout images!
+        // Auto-fit landscape layout images (attach onload BEFORE src)
         if (!savedFit) {
           img.onload = function() {
             const aspect = img.naturalWidth / img.naturalHeight;
@@ -149,6 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           };
         }
+        img.src = convertGoogleDriveLink(profile.avatarUrl);
         avatarWrapper.appendChild(img);
       } else {
         avatarWrapper.innerHTML = `<div class="avatar-phone-style" style="background-color: #555555;">
@@ -160,8 +160,9 @@ document.addEventListener("DOMContentLoaded", () => {
       nameLabel.className = "profile-name";
       nameLabel.textContent = profile.name;
       
-      card.appendChild(avatarWrapper);
+      // Name on top, Avatar underneath!
       card.appendChild(nameLabel);
+      card.appendChild(avatarWrapper);
       
       card.addEventListener("click", () => {
         loginToProfile(profile.id);
@@ -176,10 +177,10 @@ document.addEventListener("DOMContentLoaded", () => {
     addCard.className = "profile-card";
     addCard.style.animationDelay = `${index * 0.1}s`;
     addCard.innerHTML = `
+      <div class="profile-name">Adicionar</div>
       <div class="profile-avatar-wrapper profile-add">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
       </div>
-      <div class="profile-name">Adicionar</div>
     `;
     
     addCard.addEventListener("click", () => {
