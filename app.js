@@ -5,7 +5,28 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeProfileKey = "luts"; // Default active profile
   let pendingDownload = null; // Holds { btnElement, targetUrl, originalText }
   
-  // --- DOM Elements ---
+  // Helper to convert standard Google Drive sharing links into raw image hotlinks
+  function convertGoogleDriveLink(url) {
+    if (!url) return url;
+    if (url.includes("drive.google.com")) {
+      let fileId = "";
+      if (url.includes("/file/d/")) {
+        const parts = url.split("/file/d/");
+        if (parts.length > 1) {
+          fileId = parts[1].split("/")[0].split("?")[0];
+        }
+      } else if (url.includes("id=")) {
+        const parts = url.split("id=");
+        if (parts.length > 1) {
+          fileId = parts[1].split("&")[0];
+        }
+      }
+      if (fileId) {
+        return `https://drive.google.com/uc?export=view&id=${fileId}`;
+      }
+    }
+    return url;
+  }
   const profileScreen = document.getElementById("profile-screen");
   const profileGrid = document.getElementById("profile-grid");
   const tudumIntro = document.getElementById("tudum-intro");
@@ -619,7 +640,7 @@ document.addEventListener("DOMContentLoaded", () => {
         name: nameVal,
         bio: bioVal,
         avatarType: iconVal,
-        avatarUrl: iconVal === "custom" ? avatarUrlVal : "",
+        avatarUrl: iconVal === "custom" ? convertGoogleDriveLink(avatarUrlVal) : "",
         links: []
       };
       
@@ -632,7 +653,7 @@ document.addEventListener("DOMContentLoaded", () => {
       profiles[selectedKey].name = nameVal;
       profiles[selectedKey].bio = bioVal;
       profiles[selectedKey].avatarType = iconVal;
-      profiles[selectedKey].avatarUrl = iconVal === "custom" ? avatarUrlVal : "";
+      profiles[selectedKey].avatarUrl = iconVal === "custom" ? convertGoogleDriveLink(avatarUrlVal) : "";
       
       window.saveProfilesData(profiles);
       alert("Perfil atualizado com sucesso!");
@@ -745,7 +766,7 @@ document.addEventListener("DOMContentLoaded", () => {
       title: titleVal,
       desc: descVal,
       url: urlVal,
-      banner: bannerVal,
+      banner: convertGoogleDriveLink(bannerVal),
       btnText: "Acessar Link"
     };
     
