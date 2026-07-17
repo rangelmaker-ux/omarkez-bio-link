@@ -89,7 +89,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const adminLinkDesc = document.getElementById("admin-link-desc");
   const adminLinkUrl = document.getElementById("admin-link-url");
   const adminLinkBanner = document.getElementById("admin-link-banner");
+  const adminLinkBtnText = document.getElementById("admin-link-btn-text");
   const adminAddLinkBtn = document.getElementById("admin-add-link-btn");
+  const adminCancelLinkBtn = document.getElementById("admin-cancel-link-btn");
+  const adminLinkFormTitle = document.getElementById("admin-link-form-title");
+  
+  let editingLinkId = null;     // Tracks the link currently being edited
+  let editingProfileKey = null; // Tracks the profile key for the edited link
   
   // Admin Profiles CMS Form
   const adminManageProfileSelect = document.getElementById("admin-manage-profile-select");
@@ -760,6 +766,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Links Editor Actions ---
   adminProfileSelect.addEventListener("change", () => {
+    cancelEditingLink();
     renderAdminLinksList();
   });
 
@@ -788,30 +795,100 @@ document.addEventListener("DOMContentLoaded", () => {
       title.className = "admin-link-item-title";
       title.textContent = link.title;
       
+      // Action buttons container (Edit + Delete)
+      const actionWrapper = document.createElement("div");
+      actionWrapper.style.display = "flex";
+      actionWrapper.style.alignItems = "center";
+      actionWrapper.style.gap = "8px";
+      
+      // Edit Button
+      const editBtn = document.createElement("button");
+      editBtn.className = "admin-link-edit-btn";
+      editBtn.style.background = "transparent";
+      editBtn.style.border = "none";
+      editBtn.style.color = "rgba(255,255,255,0.6)";
+      editBtn.style.cursor = "pointer";
+      editBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+      
+      editBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        startEditingLink(selectedProfile, link);
+      });
+      
+      // Delete Button
       const deleteBtn = document.createElement("button");
       deleteBtn.className = "admin-link-delete-btn";
       deleteBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
       
-      deleteBtn.addEventListener("click", () => {
+      deleteBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
         deleteLink(selectedProfile, link.id);
       });
       
+      actionWrapper.appendChild(editBtn);
+      actionWrapper.appendChild(deleteBtn);
+      
       item.appendChild(thumb);
       item.appendChild(title);
-      item.appendChild(deleteBtn);
+      item.appendChild(actionWrapper);
       
       adminLinksList.appendChild(item);
     });
   }
+
+  function startEditingLink(profileKey, link) {
+    editingLinkId = link.id;
+    editingProfileKey = profileKey;
+    
+    // Fill inputs with link data
+    adminLinkTitle.value = link.title || "";
+    adminLinkDesc.value = link.desc || "";
+    adminLinkUrl.value = link.url || "";
+    adminLinkBanner.value = link.banner || "";
+    adminLinkBtnText.value = link.btnText || "";
+    
+    // Change Form visual state
+    adminLinkFormTitle.textContent = "Editar Link Cadastrado";
+    adminAddLinkBtn.textContent = "Salvar Alterações";
+    adminCancelLinkBtn.style.display = "block";
+    
+    // Smooth scroll the admin panel to the form inputs
+    adminLinkFormTitle.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function cancelEditingLink() {
+    editingLinkId = null;
+    editingProfileKey = null;
+    
+    // Reset Form
+    adminLinkTitle.value = "";
+    adminLinkDesc.value = "";
+    adminLinkUrl.value = "";
+    adminLinkBanner.value = "";
+    adminLinkBtnText.value = "";
+    
+    adminLinkFormTitle.textContent = "Adicionar Novo Link";
+    adminAddLinkBtn.textContent = "Adicionar Link";
+    adminCancelLinkBtn.style.display = "none";
+  }
+
+  adminCancelLinkBtn.addEventListener("click", cancelEditingLink);
 
   function deleteLink(profileKey, linkId) {
     const profiles = window.getProfilesData();
     const profile = profiles[profileKey];
     
     if (profile && profile.links) {
-      profile.links = profile.links.filter(l => l.id !== linkId);
-      window.saveProfilesData(profiles);
-      renderAdminLinksList();
+      if (confirm("Tem certeza que deseja apagar este link?")) {
+        // If we are currently editing this link, cancel the edit mode
+        if (editingLinkId === linkId) {
+          cancelEditingLink();
+        }
+        
+        profile.links = profile.links.filter(l => l.id !== linkId);
+        window.saveProfilesData(profiles);
+        renderAdminLinksList();
+      }
     }
   }
 
@@ -820,6 +897,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const descVal = adminLinkDesc.value.trim();
     const urlVal = adminLinkUrl.value.trim();
     const bannerVal = adminLinkBanner.value.trim();
+    const btnTextVal = adminLinkBtnText.value.trim();
     
     if (!titleVal || !urlVal) {
       alert("Por favor, preencha Título e URL!");
@@ -829,26 +907,51 @@ document.addEventListener("DOMContentLoaded", () => {
     const selectedProfile = adminProfileSelect.value;
     const profiles = window.getProfilesData();
     
-    const newLink = {
-      id: "link_" + Date.now(),
-      title: titleVal,
-      desc: descVal,
-      url: urlVal,
-      banner: convertGoogleDriveLink(bannerVal),
-      btnText: "Acessar Link"
-    };
-    
-    if (!profiles[selectedProfile].links) {
-      profiles[selectedProfile].links = [];
+    if (editingLinkId && editingProfileKey) {
+      // EDIT MODE
+      const profile = profiles[editingProfileKey];
+      if (profile && profile.links) {
+        const linkIndex = profile.links.findIndex(l => l.id === editingLinkId);
+        if (linkIndex !== -1) {
+          profile.links[linkIndex] = {
+            id: editingLinkId,
+            title: titleVal,
+            desc: descVal,
+            url: urlVal,
+            banner: convertGoogleDriveLink(bannerVal),
+            btnText: btnTextVal || "Acessar Link"
+          };
+          
+          window.saveProfilesData(profiles);
+          alert("Link atualizado com sucesso!");
+          cancelEditingLink();
+        }
+      }
+    } else {
+      // ADD MODE
+      const newLink = {
+        id: "link_" + Date.now(),
+        title: titleVal,
+        desc: descVal,
+        url: urlVal,
+        banner: convertGoogleDriveLink(bannerVal),
+        btnText: btnTextVal || "Acessar Link"
+      };
+      
+      if (!profiles[selectedProfile].links) {
+        profiles[selectedProfile].links = [];
+      }
+      
+      profiles[selectedProfile].links.push(newLink);
+      window.saveProfilesData(profiles);
+      alert("Link adicionado com sucesso!");
+      
+      adminLinkTitle.value = "";
+      adminLinkDesc.value = "";
+      adminLinkUrl.value = "";
+      adminLinkBanner.value = "";
+      adminLinkBtnText.value = "";
     }
-    
-    profiles[selectedProfile].links.push(newLink);
-    window.saveProfilesData(profiles);
-    
-    adminLinkTitle.value = "";
-    adminLinkDesc.value = "";
-    adminLinkUrl.value = "";
-    adminLinkBanner.value = "";
     
     renderAdminLinksList();
   });

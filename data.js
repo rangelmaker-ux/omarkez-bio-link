@@ -1,6 +1,6 @@
 // Marx Bio Link - Dynamic Content Database
 
-const DB_VERSION = "v13_zoom_safe_area";
+const DB_VERSION = "v14_cloud_sync_fixed";
 
 const DEFAULT_PROFILES = {
   luts: {
@@ -86,10 +86,9 @@ const DEFAULT_PROFILES = {
   }
 };
 
-// Force database reload if version is old, ensuring HD images load
+// Sync DB version tag in local storage
 const localVersion = localStorage.getItem("marx_db_version");
 if (localVersion !== DB_VERSION) {
-  localStorage.removeItem("marx_profiles_data");
   localStorage.setItem("marx_db_version", DB_VERSION);
 }
 
@@ -106,7 +105,7 @@ function getProfilesData() {
 function saveProfilesData(data) {
   localStorage.setItem("marx_profiles_data", JSON.stringify(data));
   // Push save to cloud asynchronously
-  fetch("https://kvdb.io/K9zY2wP8xR3tL6qM_omarkez_db/profiles", {
+  fetch("https://kvdb.io/ESoMeanvVB1XNDmJosDzE1/profiles", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
@@ -116,7 +115,7 @@ function saveProfilesData(data) {
 // Asynchronous Cloud Syncing
 async function syncFromCloud() {
   try {
-    const res = await fetch("https://kvdb.io/K9zY2wP8xR3tL6qM_omarkez_db/profiles");
+    const res = await fetch("https://kvdb.io/ESoMeanvVB1XNDmJosDzE1/profiles");
     if (res.status === 200) {
       const cloudData = await res.json();
       if (cloudData && typeof cloudData === "object" && Object.keys(cloudData).length > 0) {
@@ -129,7 +128,7 @@ async function syncFromCloud() {
     } else if (res.status === 404) {
       // Uninitialized bucket, push local data to cloud
       const currentLocal = getProfilesData();
-      await fetch("https://kvdb.io/K9zY2wP8xR3tL6qM_omarkez_db/profiles", {
+      await fetch("https://kvdb.io/ESoMeanvVB1XNDmJosDzE1/profiles", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(currentLocal)

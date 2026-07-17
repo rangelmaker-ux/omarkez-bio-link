@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>@Omarkez_</title>
   <meta name="description" content="Explore meus equipamentos, LUTs cinematográficos e dicas rápidas de gravação.">
-  <link rel="stylesheet" href="style.css?v=18">
+  <link rel="stylesheet" href="style.css?v=19">
 </head>
 <body>
 
@@ -163,7 +163,7 @@
 
       <!-- Add New Link Form -->
       <div class="admin-section">
-        <h3 class="admin-label" style="font-size: 0.85rem; margin-bottom: 12px; color: var(--text-main);">Adicionar Novo Link</h3>
+        <h3 id="admin-link-form-title" class="admin-label" style="font-size: 0.85rem; margin-bottom: 12px; color: var(--text-main);">Adicionar Novo Link</h3>
         
         <label class="admin-label">Título do Link</label>
         <input type="text" id="admin-link-title" class="admin-input" placeholder="Ex: Essential LUT Pack">
@@ -176,8 +176,12 @@
 
         <label class="admin-label">URL da Imagem do Banner</label>
         <input type="text" id="admin-link-banner" class="admin-input" placeholder="Ex: https://images.unsplash.com/...">
+
+        <label class="admin-label">Texto do Botão</label>
+        <input type="text" id="admin-link-btn-text" class="admin-input" placeholder="Ex: Baixar Grátis (Padrão: Acessar Link)">
         
         <button id="admin-add-link-btn" class="admin-btn">Adicionar Link</button>
+        <button id="admin-cancel-link-btn" class="admin-btn admin-btn-secondary" style="margin-top: 10px; background-color: #444; display: none;">Cancelar Edição</button>
       </div>
 
       <!-- List of Links under Selected Profile -->
@@ -230,7 +234,7 @@
   </div>
 
   <!-- Load script files -->
-  <script src="data.js?v=18"></script>
-  <script src="app.js?v=18"></script>
+  <script src="data.js?v=19"></script>
+  <script src="app.js?v=19"></script>
 </body>
 </html>
