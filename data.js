@@ -1,6 +1,6 @@
 // Marx Bio Link - Dynamic Content Database
 
-const DB_VERSION = "v15_sync_status";
+const DB_VERSION = "v16_supabase";
 
 const DEFAULT_PROFILES = {
   luts: {
@@ -102,6 +102,31 @@ function getProfilesData() {
   return JSON.parse(localData);
 }
 
+let supabaseClient = null;
+
+function getSupabaseConfig() {
+  const url = localStorage.getItem("marx_supabase_url") || "";
+  const key = localStorage.getItem("marx_supabase_key") || "";
+  return { url, key };
+}
+
+function initSupabase() {
+  const { url, key } = getSupabaseConfig();
+  if (url && key && typeof supabase !== "undefined") {
+    try {
+      supabaseClient = supabase.createClient(url, key);
+      console.log("Supabase client initialized successfully!");
+      return true;
+    } catch (e) {
+      console.error("Failed to initialize Supabase client:", e);
+    }
+  }
+  return false;
+}
+
+// Call on startup
+initSupabase();
+
 function updateSyncStatus(text, color) {
   const label = document.getElementById("admin-sync-status");
   if (label) {
@@ -114,51 +139,105 @@ function saveProfilesData(data) {
   localStorage.setItem("marx_profiles_data", JSON.stringify(data));
   updateSyncStatus("🟡 Sincronizando...", "#ff9f0a");
   
-  // Push save to cloud asynchronously
-  fetch("https://kvdb.io/ESoMeanvVB1XNDmJosDzE1/profiles", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  })
-  .then(() => {
-    updateSyncStatus("🟢 Nuvem Sincronizada", "#46d369");
-  })
-  .catch(e => {
-    console.log("Failed to sync save to cloud:", e);
-    updateSyncStatus("🔴 Erro de Sincronização", "#e50914");
-  });
+  if (supabaseClient) {
+    // Primary sync with Supabase config table
+    supabaseClient
+      .from("profiles_config")
+      .upsert({ id: "global", data: data })
+      .then(({ error }) => {
+        if (error) {
+          console.error("Supabase upsert error:", error);
+          updateSyncStatus("🔴 Erro de Sincronização", "#e50914");
+        } else {
+          updateSyncStatus("🟢 Supabase Conectado", "#24b47e");
+        }
+      })
+      .catch(e => {
+        console.error("Supabase upsert catch error:", e);
+        updateSyncStatus("🔴 Erro de Sincronização", "#e50914");
+      });
+  } else {
+    // Fallback sync with kvdb.io
+    fetch("https://kvdb.io/ESoMeanvVB1XNDmJosDzE1/profiles", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    })
+    .then(() => {
+      updateSyncStatus("🟢 Nuvem Sincronizada", "#46d369");
+    })
+    .catch(e => {
+      console.log("Failed to sync save to cloud:", e);
+      updateSyncStatus("🔴 Erro de Sincronização", "#e50914");
+    });
+  }
 }
 
 // Asynchronous Cloud Syncing
 async function syncFromCloud() {
   updateSyncStatus("🟡 Sincronizando...", "#ff9f0a");
-  try {
-    const res = await fetch("https://kvdb.io/ESoMeanvVB1XNDmJosDzE1/profiles");
-    if (res.status === 200) {
-      const cloudData = await res.json();
-      if (cloudData && typeof cloudData === "object" && Object.keys(cloudData).length > 0) {
-        localStorage.setItem("marx_profiles_data", JSON.stringify(cloudData));
-        // Callback to app.js if registered
-        if (window.onCloudSyncComplete) {
-          window.onCloudSyncComplete();
+  
+  if (supabaseClient) {
+    // Primary sync from Supabase config table
+    try {
+      const { data: row, error } = await supabaseClient
+        .from("profiles_config")
+        .select("data")
+        .eq("id", "global")
+        .single();
+        
+      if (error) {
+        if (error.code === "PGRST116") {
+          // Row doesn't exist, initialize it
+          const currentLocal = getProfilesData();
+          await supabaseClient.from("profiles_config").insert({ id: "global", data: currentLocal });
+          updateSyncStatus("🟢 Supabase Conectado", "#24b47e");
+        } else {
+          console.error("Supabase fetch error:", error);
+          updateSyncStatus("🔴 Erro de Sincronização", "#e50914");
         }
-        updateSyncStatus("🟢 Nuvem Sincronizada", "#46d369");
+      } else if (row && row.data) {
+        const cloudData = row.data;
+        if (cloudData && typeof cloudData === "object" && Object.keys(cloudData).length > 0) {
+          localStorage.setItem("marx_profiles_data", JSON.stringify(cloudData));
+          if (window.onCloudSyncComplete) {
+            window.onCloudSyncComplete();
+          }
+          updateSyncStatus("🟢 Supabase Conectado", "#24b47e");
+        }
       }
-    } else if (res.status === 404) {
-      // Uninitialized bucket, push local data to cloud
-      const currentLocal = getProfilesData();
-      await fetch("https://kvdb.io/ESoMeanvVB1XNDmJosDzE1/profiles", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(currentLocal)
-      });
-      updateSyncStatus("🟢 Nuvem Sincronizada", "#46d369");
-    } else {
-      updateSyncStatus("🔴 Erro de Sincronização", "#e50914");
+    } catch (e) {
+      console.error("Supabase sync try error:", e);
+      updateSyncStatus("🔴 Offline (Usando Cache)", "#8c8c8c");
     }
-  } catch (e) {
-    console.log("Cloud sync failed, using cached local data.", e);
-    updateSyncStatus("🔴 Offline (Usando Cache)", "#8c8c8c");
+  } else {
+    // Fallback sync from kvdb.io
+    try {
+      const res = await fetch("https://kvdb.io/ESoMeanvVB1XNDmJosDzE1/profiles");
+      if (res.status === 200) {
+        const cloudData = await res.json();
+        if (cloudData && typeof cloudData === "object" && Object.keys(cloudData).length > 0) {
+          localStorage.setItem("marx_profiles_data", JSON.stringify(cloudData));
+          if (window.onCloudSyncComplete) {
+            window.onCloudSyncComplete();
+          }
+          updateSyncStatus("🟢 Nuvem Sincronizada", "#46d369");
+        }
+      } else if (res.status === 404) {
+        const currentLocal = getProfilesData();
+        await fetch("https://kvdb.io/ESoMeanvVB1XNDmJosDzE1/profiles", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(currentLocal)
+        });
+        updateSyncStatus("🟢 Nuvem Sincronizada", "#46d369");
+      } else {
+        updateSyncStatus("🔴 Erro de Sincronização", "#e50914");
+      }
+    } catch (e) {
+      console.log("Cloud sync failed, using cached local data.", e);
+      updateSyncStatus("🔴 Offline (Usando Cache)", "#8c8c8c");
+    }
   }
 }
 
@@ -166,4 +245,5 @@ async function syncFromCloud() {
 window.getProfilesData = getProfilesData;
 window.saveProfilesData = saveProfilesData;
 window.syncFromCloud = syncFromCloud;
+window.initSupabase = initSupabase;
 window.defaultProfileSound = "https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav"; // Synth sweep

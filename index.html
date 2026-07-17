@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>@Omarkez_</title>
   <meta name="description" content="Explore meus equipamentos, LUTs cinematográficos e dicas rápidas de gravação.">
-  <link rel="stylesheet" href="style.css?v=20">
+  <link rel="stylesheet" href="style.css?v=21">
 </head>
 <body>
 
@@ -204,6 +204,19 @@
           <!-- Dynamically populated leads list -->
         </div>
       </div>
+
+      <!-- Supabase Connection Config Section -->
+      <div class="admin-section">
+        <h3 class="admin-label" style="font-size: 0.85rem; margin-bottom: 12px; color: var(--text-main);">Conexão Supabase (Sincronização 100% Estável)</h3>
+        
+        <label class="admin-label">URL do Supabase</label>
+        <input type="text" id="admin-supabase-url" class="admin-input" placeholder="Ex: https://xyzcompany.supabase.co">
+
+        <label class="admin-label">Chave Anon / Public Key</label>
+        <input type="password" id="admin-supabase-key" class="admin-input" placeholder="Cole a chave pública/anon do seu projeto">
+
+        <button id="admin-save-supabase-btn" class="admin-btn" style="background-color: #24b47e;">Conectar e Sincronizar</button>
+      </div>
     </div>
 
     <!-- 5. LEAD CAPTURE MODAL -->
@@ -235,7 +248,8 @@
   </div>
 
   <!-- Load script files -->
-  <script src="data.js?v=20"></script>
-  <script src="app.js?v=20"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="data.js?v=21"></script>
+  <script src="app.js?v=21"></script>
 </body>
 </html>
