@@ -172,6 +172,44 @@
           <!-- Dynamically populated links -->
         </div>
       </div>
+
+      <!-- Captured Leads CMS Section -->
+      <div class="admin-section">
+        <h3 id="admin-leads-title" class="admin-label" style="font-size: 0.85rem; margin-bottom: 12px; color: var(--text-main);">Leads Capturados (0)</h3>
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <button id="admin-export-leads-btn" class="admin-btn" style="flex: 1; margin-top: 0; background-color: var(--netflix-green);">Copiar CSV</button>
+          <button id="admin-clear-leads-btn" class="admin-btn admin-btn-secondary" style="flex: 1; margin-top: 0; background-color: #444;">Limpar Leads</button>
+        </div>
+        <div id="admin-leads-list" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
+          <!-- Dynamically populated leads list -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. LEAD CAPTURE MODAL -->
+    <div id="lead-modal-backdrop" class="modal-backdrop"></div>
+    <div id="lead-modal" class="details-modal" style="max-height: 60%; background-color: #1a1a1a; border-top: 3px solid var(--netflix-red);">
+      <div class="modal-scrollable-body" style="padding: 24px 20px;">
+        <button id="close-lead-modal" class="close-modal-btn">&times;</button>
+        <h2 class="modal-title" style="font-size: 1.25rem; margin-bottom: 6px; color: var(--netflix-red);">Libere seu Download</h2>
+        <p class="modal-description" style="font-size: 0.78rem; color: var(--text-sub); margin-bottom: 16px; line-height: 1.4;">
+          Insira seu Instagram para liberar o acesso ao material e receber dicas exclusivas diretamente no seu feed!
+        </p>
+        
+        <form id="lead-form" style="display: flex; flex-direction: column; gap: 12px;">
+          <div>
+            <label class="admin-label" style="margin-bottom: 5px; font-size: 0.7rem;">Seu Instagram (Obrigatório)</label>
+            <input type="text" id="lead-instagram" class="admin-input" placeholder="Ex: @seu_instagram" required style="margin-bottom: 0;">
+          </div>
+          <div>
+            <label class="admin-label" style="margin-bottom: 5px; font-size: 0.7rem;">Seu E-mail (Opcional)</label>
+            <input type="email" id="lead-email" class="admin-input" placeholder="Ex: seu@email.com" style="margin-bottom: 0;">
+          </div>
+          <button type="submit" id="lead-submit-btn" class="modal-btn-cta" style="margin-top: 8px; border-radius: 4px; padding: 10px; font-size: 0.85rem;">
+            Confirmar e Baixar
+          </button>
+        </form>
+      </div>
     </div>
 
   </div>

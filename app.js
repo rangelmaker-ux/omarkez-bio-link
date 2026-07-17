@@ -3,6 +3,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   // --- State Variables ---
   let activeProfileKey = "luts"; // Default active profile
+  let pendingDownload = null; // Holds { btnElement, targetUrl, originalText }
   
   // --- DOM Elements ---
   const profileScreen = document.getElementById("profile-screen");
@@ -21,6 +22,14 @@ document.addEventListener("DOMContentLoaded", () => {
   
   const headerAvatarBox = document.getElementById("header-avatar-box");
   const verticalLinkContainer = document.getElementById("vertical-link-container");
+  
+  // Lead Modal Elements
+  const leadModalBackdrop = document.getElementById("lead-modal-backdrop");
+  const leadModal = document.getElementById("lead-modal");
+  const closeLeadModalBtn = document.getElementById("close-lead-modal");
+  const leadForm = document.getElementById("lead-form");
+  const leadInstagramInput = document.getElementById("lead-instagram");
+  const leadEmailInput = document.getElementById("lead-email");
   
   // Admin Elements
   const manageProfilesBtn = document.getElementById("manage-profiles-btn");
@@ -46,6 +55,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const adminSaveProfileBtn = document.getElementById("admin-save-profile-btn");
   const adminDeleteProfileBtn = document.getElementById("admin-delete-profile-btn");
   
+  // Admin Leads Section
+  const adminLeadsTitle = document.getElementById("admin-leads-title");
+  const adminLeadsList = document.getElementById("admin-leads-list");
+  const adminExportLeadsBtn = document.getElementById("admin-export-leads-btn");
+  const adminClearLeadsBtn = document.getElementById("admin-clear-leads-btn");
+  
   const downloadTriggerBtn = document.getElementById("download-trigger-btn");
   
   // Audio setup
@@ -62,7 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const profiles = window.getProfilesData();
     let index = 0;
     
-    // Render existing database profiles
     Object.keys(profiles).forEach(key => {
       const profile = profiles[key];
       const card = document.createElement("div");
@@ -73,7 +87,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const avatarWrapper = document.createElement("div");
       avatarWrapper.className = "profile-avatar-wrapper";
       
-      // Determine avatar type
       if (profile.avatarType === "gradient") {
         avatarWrapper.innerHTML = `<div class="avatar-gradient-style"></div>`;
       } else if (profile.avatarType === "phone") {
@@ -84,12 +97,11 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (profile.avatarType === "camera") {
         avatarWrapper.innerHTML = `
           <div class="avatar-camera-style">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
           </div>`;
       } else if (profile.avatarType === "custom" && profile.avatarUrl) {
         avatarWrapper.innerHTML = `<img class="profile-avatar" src="${profile.avatarUrl}" alt="${profile.name}">`;
       } else {
-        // Fallback custom color
         avatarWrapper.innerHTML = `<div class="avatar-phone-style" style="background-color: #555555;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
         </div>`;
@@ -102,7 +114,6 @@ document.addEventListener("DOMContentLoaded", () => {
       card.appendChild(avatarWrapper);
       card.appendChild(nameLabel);
       
-      // Click Transition
       card.addEventListener("click", () => {
         loginToProfile(profile.id);
       });
@@ -122,9 +133,8 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="profile-name">Adicionar</div>
     `;
     
-    // Click triggers admin auth and automatically selects "new" profile creation
     addCard.addEventListener("click", () => {
-      triggerAdminAuth(true); // Open admin directly on Profile tab with "New Profile" active
+      triggerAdminAuth(true);
     });
     profileGrid.appendChild(addCard);
   }
@@ -165,10 +175,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!profile) return;
     
     activeProfileKey = profileKey;
-    
     updateHeaderAvatar(profileKey);
     
-    // Play Tudum sound and transition
     tudumAudio.play().catch(e => console.log("Audio play blocked by browser:", e));
     
     profileScreen.classList.add("hide");
@@ -185,9 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function populateAdminSelects(selectedProfileKey = null, selectedManageKey = null) {
     const profiles = window.getProfilesData();
     
-    // 1. Populate Link Editor profile selector
     adminProfileSelect.innerHTML = "";
-    // 2. Populate Profile Editor selector
     adminManageProfileSelect.innerHTML = "";
     
     Object.keys(profiles).forEach(key => {
@@ -204,13 +210,11 @@ document.addEventListener("DOMContentLoaded", () => {
       adminManageProfileSelect.appendChild(optManage);
     });
     
-    // Append [Novo Perfil] option to manage profiles select
     const optNew = document.createElement("option");
     optNew.value = "[new]";
     optNew.textContent = "(+) Criar Novo Perfil";
     adminManageProfileSelect.appendChild(optNew);
     
-    // Restore chosen values if specified
     if (selectedProfileKey) {
       adminProfileSelect.value = selectedProfileKey;
     }
@@ -219,12 +223,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // --- Simulated Action Loader Action ---
-  function triggerSimulatedAction(btnElement, targetUrl, originalText) {
+  // --- Simulated Download / Acessar Loader Action ---
+  function triggerSimulatedAction(btnElement, targetUrl, originalText, bypassLead = false) {
     const isDownload = originalText.toLowerCase().includes("baixar") || 
                        originalText.toLowerCase().includes("luts") ||
                        originalText.toLowerCase().includes("download");
                        
+    // Intercept with Lead Capture Form first if it is a download and we haven't bypassed it yet
+    if (isDownload && !bypassLead) {
+      pendingDownload = { btnElement, targetUrl, originalText };
+      openLeadModal();
+      return;
+    }
+
     if (isDownload) {
       btnElement.classList.add("loading");
       btnElement.innerHTML = `Baixando...`;
@@ -250,6 +261,64 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 600);
     }
   }
+
+  // --- Lead Modal Control ---
+  function openLeadModal() {
+    leadInstagramInput.value = "";
+    leadEmailInput.value = "";
+    leadModalBackdrop.classList.add("show");
+    leadModal.classList.add("show");
+  }
+
+  function closeLeadModal() {
+    leadModalBackdrop.classList.remove("show");
+    leadModal.classList.remove("show");
+    pendingDownload = null;
+  }
+
+  closeLeadModalBtn.addEventListener("click", closeLeadModal);
+  leadModalBackdrop.addEventListener("click", closeLeadModal);
+
+  // Submit Lead Form
+  leadForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    
+    let insta = leadInstagramInput.value.trim();
+    const email = leadEmailInput.value.trim();
+    
+    if (!insta) {
+      alert("Por favor, preencha o seu Instagram!");
+      return;
+    }
+    
+    // Formatting Instagram Handle
+    if (!insta.startsWith("@")) {
+      insta = "@" + insta;
+    }
+    
+    // Save lead to LocalStorage
+    const leads = JSON.parse(localStorage.getItem("marx_captured_leads")) || [];
+    const newLead = {
+      id: Date.now(),
+      instagram: insta,
+      email: email || "Não informado",
+      item: pendingDownload ? pendingDownload.originalText : "Download Geral",
+      date: new Date().toLocaleDateString("pt-BR")
+    };
+    leads.push(newLead);
+    localStorage.setItem("marx_captured_leads", JSON.stringify(leads));
+    
+    // Close modal
+    leadModalBackdrop.classList.remove("show");
+    leadModal.classList.remove("show");
+    
+    // Run the pending download animation and redirect
+    if (pendingDownload) {
+      const { btnElement, targetUrl, originalText } = pendingDownload;
+      pendingDownload = null;
+      triggerSimulatedAction(btnElement, targetUrl, originalText, true); // bypassLead = true to execute download
+    }
+  });
 
   // --- Render Vertical Links in Home ---
   function renderVerticalLinks(profileKey) {
@@ -368,15 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
   downloadTriggerBtn.addEventListener("click", (e) => {
     e.preventDefault();
-    downloadTriggerBtn.classList.add("loading");
-    downloadTriggerBtn.textContent = "Carregando...";
-    
-    setTimeout(() => {
-      downloadTriggerBtn.classList.remove("loading");
-      downloadTriggerBtn.textContent = "Ver LUTs & Presets";
-      activeProfileKey = "luts";
-      document.querySelector('[data-tab="home"]').click();
-    }, 1000);
+    triggerSimulatedAction(downloadTriggerBtn, "#", "LUTs & Presets");
   });
 
   // --- Inline Search Logic ---
@@ -433,7 +494,7 @@ document.addEventListener("DOMContentLoaded", () => {
       row.appendChild(playBtn);
       
       row.addEventListener("click", () => {
-        window.open(link.url, "_blank");
+        triggerSimulatedAction(playBtn, link.url, link.title);
       });
       
       searchResults.appendChild(row);
@@ -476,28 +537,27 @@ document.addEventListener("DOMContentLoaded", () => {
   function openAdminPanel(focusOnNewProfile = false) {
     adminOverlay.classList.add("show");
     
-    // Repopulate selects and open listings
     populateAdminSelects();
     renderAdminLinksList();
+    renderAdminLeadsList(); // Load leads
     
     if (focusOnNewProfile) {
       adminManageProfileSelect.value = "[new]";
     } else {
-      adminManageProfileSelect.value = "luts"; // Default select first
+      adminManageProfileSelect.value = "luts";
     }
     syncManageProfileFields();
   }
 
   function closeAdminPanel() {
     adminOverlay.classList.remove("show");
-    renderProfilesGrid(); // Reload selector grid in case profiles were added/edited
-    renderVerticalLinks(activeProfileKey); // Reload current links list
+    renderProfilesGrid();
+    renderVerticalLinks(activeProfileKey);
   }
 
   adminCloseBtn.addEventListener("click", closeAdminPanel);
 
   // --- Profile Editor CMS Actions ---
-  
   adminManageProfileSelect.addEventListener("change", syncManageProfileFields);
   adminProfileIconSelect.addEventListener("change", toggleAvatarUrlField);
   
@@ -507,23 +567,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const profile = profiles[selectedKey];
     
     if (selectedKey === "[new]") {
-      // Setup default blank values for a new profile
       adminProfileName.value = "";
       adminProfileBio.value = "";
-      adminProfileIconSelect.value = "custom"; // custom image url by default
+      adminProfileIconSelect.value = "custom";
       adminProfileAvatarUrl.value = "";
       
-      // Hide delete, show avatar url input
       adminDeleteProfileBtn.style.display = "none";
       toggleAvatarUrlField();
     } else if (profile) {
-      // Load details of selected profile
       adminProfileName.value = profile.name;
       adminProfileBio.value = profile.bio || "";
       adminProfileIconSelect.value = profile.avatarType || "custom";
       adminProfileAvatarUrl.value = profile.avatarUrl || "";
       
-      // Deletion restrictions: Protect core profiles
       const isCore = (profile.id === "luts" || profile.id === "mobile" || profile.id === "sony");
       adminDeleteProfileBtn.style.display = isCore ? "none" : "block";
       
@@ -542,7 +598,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
-  // Save / Create Profile Click Handler
   adminSaveProfileBtn.addEventListener("click", () => {
     const nameVal = adminProfileName.value.trim();
     const bioVal = adminProfileBio.value.trim();
@@ -558,7 +613,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const profiles = window.getProfilesData();
     
     if (selectedKey === "[new]") {
-      // Create new profile unique ID
       const newKey = "profile_" + Date.now();
       profiles[newKey] = {
         id: newKey,
@@ -575,7 +629,6 @@ document.addEventListener("DOMContentLoaded", () => {
       populateAdminSelects(newKey, newKey);
       syncManageProfileFields();
     } else if (profiles[selectedKey]) {
-      // Update existing profile details
       profiles[selectedKey].name = nameVal;
       profiles[selectedKey].bio = bioVal;
       profiles[selectedKey].avatarType = iconVal;
@@ -587,7 +640,6 @@ document.addEventListener("DOMContentLoaded", () => {
       populateAdminSelects(selectedKey, selectedKey);
       syncManageProfileFields();
       
-      // Keep main header profile avatar in sync if active profile was modified
       if (selectedKey === activeProfileKey) {
         updateHeaderAvatar(activeProfileKey);
       }
@@ -596,11 +648,9 @@ document.addEventListener("DOMContentLoaded", () => {
     renderProfilesGrid();
   });
   
-  // Delete Profile Handler
   adminDeleteProfileBtn.addEventListener("click", () => {
     const selectedKey = adminManageProfileSelect.value;
     
-    // Core protection check
     if (selectedKey === "luts" || selectedKey === "mobile" || selectedKey === "sony") {
       alert("Este é um perfil do sistema e não pode ser excluído.");
       return;
@@ -620,12 +670,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // --- Links Editor Actions ---
-
   adminProfileSelect.addEventListener("change", () => {
     renderAdminLinksList();
   });
 
-  // Render Admin Links
   function renderAdminLinksList() {
     adminLinksList.innerHTML = "";
     const selectedProfile = adminProfileSelect.value;
@@ -667,7 +715,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Delete Link
   function deleteLink(profileKey, linkId) {
     const profiles = window.getProfilesData();
     const profile = profiles[profileKey];
@@ -679,7 +726,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Add Link
   adminAddLinkBtn.addEventListener("click", () => {
     const titleVal = adminLinkTitle.value.trim();
     const descVal = adminLinkDesc.value.trim();
@@ -710,13 +756,84 @@ document.addEventListener("DOMContentLoaded", () => {
     profiles[selectedProfile].links.push(newLink);
     window.saveProfilesData(profiles);
     
-    // Reset Form
     adminLinkTitle.value = "";
     adminLinkDesc.value = "";
     adminLinkUrl.value = "";
     adminLinkBanner.value = "";
     
-    // Refresh Admin List
     renderAdminLinksList();
+  });
+
+
+  // --- SUPER USER: LEADS TRACKER CMS ---
+  
+  function renderAdminLeadsList() {
+    adminLeadsList.innerHTML = "";
+    const leads = JSON.parse(localStorage.getItem("marx_captured_leads")) || [];
+    
+    adminLeadsTitle.textContent = `Leads Capturados (${leads.length})`;
+    
+    if (leads.length === 0) {
+      adminLeadsList.innerHTML = `<div style="text-align: center; color: var(--text-sub); font-size: 0.8rem; padding: 20px 0;">Nenhum lead capturado ainda.</div>`;
+      return;
+    }
+    
+    // Render descending (most recent first)
+    [...leads].reverse().forEach(lead => {
+      const item = document.createElement("div");
+      item.className = "admin-link-item";
+      item.style.flexDirection = "column";
+      item.style.alignItems = "flex-start";
+      item.style.gap = "4px";
+      item.style.padding = "10px 12px";
+      
+      item.innerHTML = `
+        <div style="display:flex; justify-content:space-between; width:100%; font-size:0.8rem; font-weight:700;">
+          <span style="color:var(--netflix-red);">${lead.instagram}</span>
+          <span style="color:var(--text-sub); font-weight:400; font-size:0.7rem;">${lead.date}</span>
+        </div>
+        <div style="font-size:0.75rem; color:#dddddd; word-break:break-all;">E-mail: ${lead.email}</div>
+        <div style="font-size:0.7rem; color:var(--text-sub);">Baixou: ${lead.item}</div>
+      `;
+      adminLeadsList.appendChild(item);
+    });
+  }
+
+  // Clear leads database
+  adminClearLeadsBtn.addEventListener("click", () => {
+    if (confirm("Tem certeza que deseja apagar permanentemente toda a lista de leads capturados?")) {
+      localStorage.removeItem("marx_captured_leads");
+      renderAdminLeadsList();
+      alert("Lista de leads limpa!");
+    }
+  });
+
+  // Export leads to CSV (Copy to Clipboard)
+  adminExportLeadsBtn.addEventListener("click", () => {
+    const leads = JSON.parse(localStorage.getItem("marx_captured_leads")) || [];
+    if (leads.length === 0) {
+      alert("Nenhum lead disponível para exportação!");
+      return;
+    }
+    
+    // Build CSV Content
+    let csvContent = "Data,Instagram,Email,Item Baixado\n";
+    leads.forEach(lead => {
+      // Escape commas to avoid shifting columns in Excel
+      const cleanInsta = lead.instagram.replace(/"/g, '""');
+      const cleanEmail = lead.email.replace(/"/g, '""');
+      const cleanItem = lead.item.replace(/"/g, '""');
+      csvContent += `"${lead.date}","${cleanInsta}","${cleanEmail}","${cleanItem}"\n`;
+    });
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(csvContent)
+      .then(() => {
+        alert("Lista de leads copiada com sucesso no formato CSV!\n\nAbra o Excel ou Bloco de Notas e aperte CTRL+V para colar.");
+      })
+      .catch(err => {
+        console.error("Clipboard copy failed:", err);
+        alert("Erro ao copiar CSV para a área de transferência. Veja o console.");
+      });
   });
 });
