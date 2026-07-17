@@ -101,6 +101,14 @@ document.addEventListener("DOMContentLoaded", () => {
   renderProfilesGrid();
   populateAdminSelects();
 
+  // --- Cloud Sync Completed Listener ---
+  window.onCloudSyncComplete = () => {
+    renderProfilesGrid();
+    renderVerticalLinks(activeProfileKey);
+    updateHeaderAvatar(activeProfileKey);
+    populateAdminSelects(activeProfileKey);
+  };
+
   // --- Render Profiles Selection Grid ---
   function renderProfilesGrid() {
     profileGrid.innerHTML = "";
@@ -408,11 +416,16 @@ document.addEventListener("DOMContentLoaded", () => {
     // 2. Link Cards Stack
     if (!currentProfile.links || currentProfile.links.length === 0) {
       const emptyMsg = document.createElement("div");
+      emptyMsg.className = "empty-profile-placeholder";
       emptyMsg.style.textAlign = "center";
-      emptyMsg.style.color = "var(--text-sub)";
-      emptyMsg.style.padding = "40px 0";
-      emptyMsg.style.fontSize = "0.9rem";
-      emptyMsg.textContent = "Nenhum link cadastrado para este perfil.";
+      emptyMsg.style.padding = "60px 20px";
+      emptyMsg.innerHTML = `
+        <div style="font-size: 2.2rem; margin-bottom: 12px; opacity: 0.85;">📭</div>
+        <div style="font-weight: 700; color: #fff; margin-bottom: 6px; font-size: 1.05rem;">Este perfil ainda está vazio</div>
+        <div style="font-size: 0.76rem; color: var(--text-sub); max-width: 220px; margin: 0 auto; line-height: 1.4;">
+          Nenhum link ou material foi cadastrado por aqui ainda. Adicione links pelo painel Super Usuário!
+        </div>
+      `;
       verticalLinkContainer.appendChild(emptyMsg);
       return;
     }

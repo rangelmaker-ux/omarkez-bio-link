@@ -105,7 +105,43 @@ function getProfilesData() {
 
 function saveProfilesData(data) {
   localStorage.setItem("marx_profiles_data", JSON.stringify(data));
+  // Push save to cloud asynchronously
+  fetch("https://kvdb.io/K9zY2wP8xR3tL6qM_omarkez_db/profiles", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  }).catch(e => console.log("Failed to sync save to cloud:", e));
 }
+
+// Asynchronous Cloud Syncing
+async function syncFromCloud() {
+  try {
+    const res = await fetch("https://kvdb.io/K9zY2wP8xR3tL6qM_omarkez_db/profiles");
+    if (res.status === 200) {
+      const cloudData = await res.json();
+      if (cloudData && typeof cloudData === "object" && Object.keys(cloudData).length > 0) {
+        localStorage.setItem("marx_profiles_data", JSON.stringify(cloudData));
+        // Callback to app.js if registered
+        if (window.onCloudSyncComplete) {
+          window.onCloudSyncComplete();
+        }
+      }
+    } else if (res.status === 404) {
+      // Uninitialized bucket, push local data to cloud
+      const currentLocal = getProfilesData();
+      await fetch("https://kvdb.io/K9zY2wP8xR3tL6qM_omarkez_db/profiles", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(currentLocal)
+      });
+    }
+  } catch (e) {
+    console.log("Cloud sync failed, using cached local data.", e);
+  }
+}
+
+// Run cloud sync automatically in the background
+syncFromCloud();
 
 // Make available globally
 window.getProfilesData = getProfilesData;
