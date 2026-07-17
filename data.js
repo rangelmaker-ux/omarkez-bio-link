@@ -1,12 +1,15 @@
 // Marx Bio Link - Dynamic Content Database
 
-const DB_VERSION = "v5_sony_cover";
+const DB_VERSION = "v6_luts_cover";
 
 const DEFAULT_PROFILES = {
   luts: {
     id: "luts",
     name: "LUTs",
-    avatarType: "gradient",
+    avatarType: "custom",
+    avatarUrl: "assets/luts_cover.jpg",
+    avatarPosition: "center",
+    avatarFit: "cover",
     bio: "Pacotes de LUTs cinemáticos para câmeras e celular.",
     links: [
       {
