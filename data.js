@@ -1,6 +1,6 @@
 // Marx Bio Link - Dynamic Content Database
 
-const DB_VERSION = "v18_self_heal";
+const DB_VERSION = "v24_umd_fix";
 
 const DEFAULT_PROFILES = {
   luts: {
