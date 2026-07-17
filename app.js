@@ -135,6 +135,11 @@ document.addEventListener("DOMContentLoaded", () => {
     populateAdminSelects(activeProfileKey);
   };
 
+  // Start cloud sync now that listener is ready
+  if (typeof window.syncFromCloud === "function") {
+    window.syncFromCloud();
+  }
+
   // --- Render Profiles Selection Grid ---
   function renderProfilesGrid() {
     profileGrid.innerHTML = "";
@@ -610,6 +615,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function openAdminPanel(focusOnNewProfile = false) {
     adminOverlay.classList.add("show");
+    
+    // Trigger background sync to pull latest changes from cloud
+    if (typeof window.syncFromCloud === "function") {
+      window.syncFromCloud();
+    }
     
     populateAdminSelects();
     renderAdminLinksList();

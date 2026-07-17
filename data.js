@@ -1,6 +1,6 @@
 // Marx Bio Link - Dynamic Content Database
 
-const DB_VERSION = "v14_cloud_sync_fixed";
+const DB_VERSION = "v15_sync_status";
 
 const DEFAULT_PROFILES = {
   luts: {
@@ -102,18 +102,36 @@ function getProfilesData() {
   return JSON.parse(localData);
 }
 
+function updateSyncStatus(text, color) {
+  const label = document.getElementById("admin-sync-status");
+  if (label) {
+    label.textContent = text;
+    label.style.color = color;
+  }
+}
+
 function saveProfilesData(data) {
   localStorage.setItem("marx_profiles_data", JSON.stringify(data));
+  updateSyncStatus("🟡 Sincronizando...", "#ff9f0a");
+  
   // Push save to cloud asynchronously
   fetch("https://kvdb.io/ESoMeanvVB1XNDmJosDzE1/profiles", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
-  }).catch(e => console.log("Failed to sync save to cloud:", e));
+  })
+  .then(() => {
+    updateSyncStatus("🟢 Nuvem Sincronizada", "#46d369");
+  })
+  .catch(e => {
+    console.log("Failed to sync save to cloud:", e);
+    updateSyncStatus("🔴 Erro de Sincronização", "#e50914");
+  });
 }
 
 // Asynchronous Cloud Syncing
 async function syncFromCloud() {
+  updateSyncStatus("🟡 Sincronizando...", "#ff9f0a");
   try {
     const res = await fetch("https://kvdb.io/ESoMeanvVB1XNDmJosDzE1/profiles");
     if (res.status === 200) {
@@ -124,6 +142,7 @@ async function syncFromCloud() {
         if (window.onCloudSyncComplete) {
           window.onCloudSyncComplete();
         }
+        updateSyncStatus("🟢 Nuvem Sincronizada", "#46d369");
       }
     } else if (res.status === 404) {
       // Uninitialized bucket, push local data to cloud
@@ -133,16 +152,18 @@ async function syncFromCloud() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(currentLocal)
       });
+      updateSyncStatus("🟢 Nuvem Sincronizada", "#46d369");
+    } else {
+      updateSyncStatus("🔴 Erro de Sincronização", "#e50914");
     }
   } catch (e) {
     console.log("Cloud sync failed, using cached local data.", e);
+    updateSyncStatus("🔴 Offline (Usando Cache)", "#8c8c8c");
   }
 }
-
-// Run cloud sync automatically in the background
-syncFromCloud();
 
 // Make available globally
 window.getProfilesData = getProfilesData;
 window.saveProfilesData = saveProfilesData;
+window.syncFromCloud = syncFromCloud;
 window.defaultProfileSound = "https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav"; // Synth sweep
