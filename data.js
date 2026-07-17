@@ -1,6 +1,6 @@
 // Marx Bio Link - Dynamic Content Database
 
-const DB_VERSION = "v16_supabase";
+const DB_VERSION = "v17_hardcoded_supabase";
 
 const DEFAULT_PROFILES = {
   luts: {
@@ -105,8 +105,8 @@ function getProfilesData() {
 let supabaseClient = null;
 
 function getSupabaseConfig() {
-  const url = localStorage.getItem("marx_supabase_url") || "";
-  const key = localStorage.getItem("marx_supabase_key") || "";
+  const url = "https://cvgagkbiyqtqhullgdya.supabase.co";
+  const key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2Z2Fna2JpeXF0cWh1bGxnZHlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNTM2MjEsImV4cCI6MjA5OTgyOTYyMX0.JLWc1sml-i0EE_R51Ru4CoSwz9D-AFQKE-dCON7ulI4";
   return { url, key };
 }
 

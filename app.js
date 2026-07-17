@@ -117,11 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const adminExportLeadsBtn = document.getElementById("admin-export-leads-btn");
   const adminClearLeadsBtn = document.getElementById("admin-clear-leads-btn");
   
-  // Admin Supabase Config Selectors
-  const adminSupabaseUrl = document.getElementById("admin-supabase-url");
-  const adminSupabaseKey = document.getElementById("admin-supabase-key");
-  const adminSaveSupabaseBtn = document.getElementById("admin-save-supabase-btn");
-  
   const downloadTriggerBtn = document.getElementById("download-trigger-btn");
   
   // Audio setup
@@ -630,10 +625,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderAdminLinksList();
     renderAdminLeadsList();
     
-    // Populate Supabase inputs
-    adminSupabaseUrl.value = localStorage.getItem("marx_supabase_url") || "";
-    adminSupabaseKey.value = localStorage.getItem("marx_supabase_key") || "";
-    
     if (focusOnNewProfile) {
       adminManageProfileSelect.value = "[new]";
     } else {
@@ -1048,27 +1039,5 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   });
 
-  // Save Supabase Credentials & Re-initialize
-  adminSaveSupabaseBtn.addEventListener("click", () => {
-    const urlVal = adminSupabaseUrl.value.trim();
-    const keyVal = adminSupabaseKey.value.trim();
-    
-    localStorage.setItem("marx_supabase_url", urlVal);
-    localStorage.setItem("marx_supabase_key", keyVal);
-    
-    if (typeof window.initSupabase === "function") {
-      const success = window.initSupabase();
-      if (success) {
-        alert("Conexão Supabase configurada! Sincronizando dados com a nuvem...");
-      } else if (urlVal || keyVal) {
-        alert("Configurações salvas, mas a conexão com o Supabase falhou. Verifique se os dados estão corretos.");
-      } else {
-        alert("Supabase desconectado. Voltando a usar o banco de dados padrão (kvdb).");
-      }
-    }
-    
-    if (typeof window.syncFromCloud === "function") {
-      window.syncFromCloud();
-    }
   });
 });
