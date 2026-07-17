@@ -1,6 +1,6 @@
 // Marx Bio Link - Dynamic Content Database
 
-const DB_VERSION = "v17_hardcoded_supabase";
+const DB_VERSION = "v18_self_heal";
 
 const DEFAULT_PROFILES = {
   luts: {
@@ -92,14 +92,25 @@ if (localVersion !== DB_VERSION) {
   localStorage.setItem("marx_db_version", DB_VERSION);
 }
 
-// LocalStorage Management
 function getProfilesData() {
-  const localData = localStorage.getItem("marx_profiles_data");
-  if (!localData) {
+  let localData = localStorage.getItem("marx_profiles_data");
+  let parsed = null;
+  
+  if (localData && localData !== "undefined" && localData !== "null") {
+    try {
+      parsed = JSON.parse(localData);
+    } catch (e) {
+      console.error("Error parsing local storage profiles:", e);
+    }
+  }
+  
+  // If parsed data is empty, null, or not an object, fallback to DEFAULT_PROFILES
+  if (!parsed || typeof parsed !== "object" || Object.keys(parsed).length === 0) {
     localStorage.setItem("marx_profiles_data", JSON.stringify(DEFAULT_PROFILES));
     return DEFAULT_PROFILES;
   }
-  return JSON.parse(localData);
+  
+  return parsed;
 }
 
 let supabaseClient = null;
@@ -196,10 +207,22 @@ async function syncFromCloud() {
           console.error("Supabase fetch error:", error);
           updateSyncStatus("🔴 Erro de Sincronização", "#e50914");
         }
-      } else if (row && row.data) {
-        const cloudData = row.data;
+      } else {
+        const cloudData = row ? row.data : null;
         if (cloudData && typeof cloudData === "object" && Object.keys(cloudData).length > 0) {
           localStorage.setItem("marx_profiles_data", JSON.stringify(cloudData));
+          if (window.onCloudSyncComplete) {
+            window.onCloudSyncComplete();
+          }
+          updateSyncStatus("🟢 Supabase Conectado", "#24b47e");
+        } else {
+          // Self-heal: Cloud database exists but is empty or null!
+          // Push our local profiles (which are guaranteed valid) to initialize the cloud database.
+          const currentLocal = getProfilesData();
+          await supabaseClient.from("profiles_config").upsert({ id: "global", data: currentLocal });
+          
+          // Also save locally and trigger render in case local was empty
+          localStorage.setItem("marx_profiles_data", JSON.stringify(currentLocal));
           if (window.onCloudSyncComplete) {
             window.onCloudSyncComplete();
           }
