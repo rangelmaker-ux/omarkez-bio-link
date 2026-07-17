@@ -1,6 +1,6 @@
 // Marx Bio Link - Dynamic Content Database
 
-const DB_VERSION = "v6_luts_cover";
+const DB_VERSION = "v7_mobile_cover";
 
 const DEFAULT_PROFILES = {
   luts: {
@@ -33,7 +33,10 @@ const DEFAULT_PROFILES = {
   mobile: {
     id: "mobile",
     name: "Config. Mobile",
-    avatarType: "phone",
+    avatarType: "custom",
+    avatarUrl: "assets/mobile_cover.png",
+    avatarPosition: "center",
+    avatarFit: "cover",
     bio: "Dicas de gravação e configurações para iPhone & Android (Blackmagic App).",
     links: [
       {
