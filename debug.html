@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Debug Bio Link</title>
+</head>
+<body style="background: black; margin: 0; padding: 20px;">
+  <div id="logs" style="font-family: monospace; white-space: pre-wrap; font-size: 14px; line-height: 1.4; color: #4af626; background: #000;">
+    === DIAGNOSTIC LOGS ===
+  </div>
+  <script>
+    const logsDiv = document.getElementById("logs");
+    function log(msg, color = '#4af626') {
+      const p = document.createElement("div");
+      p.style.color = color;
+      p.style.borderBottom = "1px solid #222";
+      p.style.padding = "6px 0";
+      p.textContent = msg;
+      logsDiv.appendChild(p);
+    }
+    window.onerror = function(msg, url, line) {
+      log("❌ RUNTIME ERROR: " + msg + "\nURL: " + url + "\nLine: " + line, 'red');
+    };
+    window.onunhandledrejection = function(e) {
+      log("❌ UNHANDLED REJECTION: " + e.reason + " | message: " + (e.reason ? e.reason.message : ''), 'orange');
+    };
+  </script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="data.js?v=24"></script>
+  <script src="app.js?v=24"></script>
+  
+  <script>
+    log("Supabase variable type: " + typeof supabase);
+    log("window.getProfilesData type: " + typeof window.getProfilesData);
+    log("window.syncFromCloud type: " + typeof window.syncFromCloud);
+    
+    try {
+      const data = window.getProfilesData();
+      log("✅ Local profiles successfully retrieved: " + JSON.stringify(data, null, 2));
+    } catch(e) {
+      log("❌ getProfilesData crashed: " + e.message, 'red');
+    }
+    
+    // Check if DOM elements are present
+    const elIds = ["profile-screen", "profile-grid", "tudum-intro", "main-app"];
+    elIds.forEach(id => {
+      const el = document.getElementById(id);
+      log("DOM element #" + id + " exists: " + (el !== null));
+    });
+  </script>
+</body>
+</html>
