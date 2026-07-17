@@ -130,7 +130,26 @@ document.addEventListener("DOMContentLoaded", () => {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
           </div>`;
       } else if (profile.avatarType === "custom" && profile.avatarUrl) {
-        avatarWrapper.innerHTML = `<img class="profile-avatar" src="${convertGoogleDriveLink(profile.avatarUrl)}" alt="${profile.name}" style="object-fit: ${profile.avatarFit || 'cover'}; object-position: ${profile.avatarPosition || 'center'}; background-color: #000;">`;
+        const img = document.createElement("img");
+        img.className = "profile-avatar";
+        img.src = convertGoogleDriveLink(profile.avatarUrl);
+        img.alt = profile.name;
+        img.style.backgroundColor = "#000";
+        img.style.objectPosition = profile.avatarPosition || "center";
+        
+        const savedFit = profile.avatarFit || "";
+        img.style.objectFit = savedFit ? savedFit : "cover";
+        
+        // Auto-fit landscape layout images!
+        if (!savedFit) {
+          img.onload = function() {
+            const aspect = img.naturalWidth / img.naturalHeight;
+            if (aspect > 1.2) {
+              img.style.objectFit = "contain";
+            }
+          };
+        }
+        avatarWrapper.appendChild(img);
       } else {
         avatarWrapper.innerHTML = `<div class="avatar-phone-style" style="background-color: #555555;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
@@ -190,10 +209,26 @@ document.addEventListener("DOMContentLoaded", () => {
       headerAvatarBox.classList.add("camera");
       headerAvatarBox.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>`;
     } else if (profile.avatarType === "custom" && profile.avatarUrl) {
-      headerAvatarBox.style.backgroundImage = `url('${convertGoogleDriveLink(profile.avatarUrl)}')`;
-      headerAvatarBox.style.backgroundSize = profile.avatarFit || "cover";
+      const imgUrl = convertGoogleDriveLink(profile.avatarUrl);
+      headerAvatarBox.style.backgroundImage = `url('${imgUrl}')`;
       headerAvatarBox.style.backgroundPosition = profile.avatarPosition || "center";
       headerAvatarBox.style.backgroundColor = "#000";
+      
+      const savedFit = profile.avatarFit || "";
+      headerAvatarBox.style.backgroundSize = savedFit ? savedFit : "cover";
+      
+      if (!savedFit) {
+        const tempImg = new Image();
+        tempImg.src = imgUrl;
+        tempImg.onload = function() {
+          const aspect = tempImg.naturalWidth / tempImg.naturalHeight;
+          if (aspect > 1.2) {
+            headerAvatarBox.style.backgroundSize = "contain";
+          } else {
+            headerAvatarBox.style.backgroundSize = "cover";
+          }
+        };
+      }
     } else {
       headerAvatarBox.style.backgroundColor = "#555555";
     }
