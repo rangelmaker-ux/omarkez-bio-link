@@ -1,6 +1,6 @@
 // Marx Bio Link - Dynamic Content Database
 
-const DB_VERSION = "v10_premium_ui";
+const DB_VERSION = "v11_responsive";
 
 const DEFAULT_PROFILES = {
   luts: {
