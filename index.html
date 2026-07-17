@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>@Omarkez_</title>
+  <meta name="description" content="Explore meus equipamentos, LUTs cinematográficos e dicas rápidas de gravação.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- 1. PROFILE SELECTION SCREEN -->
+    <div id="profile-screen" class="profile-screen">
+      <div class="profile-header">
+        <div class="marx-brand-logo">@Omarkez<span>_</span></div>
+      </div>
+      <h1 class="profile-title">O que você precisa hoje?</h1>
+      <div id="profile-grid" class="profile-grid">
+        <!-- Dynamic profiles loaded from JS -->
+      </div>
+      <button id="manage-profiles-btn" class="manage-profiles-btn">Gerenciar Perfis</button>
+    </div>
+
+    <!-- 2. TUDUM AUDIO INTRO SCREEN -->
+    <div id="tudum-intro" class="tudum-intro">
+      <div class="tudum-logo">@Omarkez<span>_</span></div>
+    </div>
+
+    <!-- 3. MAIN APPLICATION INTERFACE -->
+    <div id="main-app" class="main-app">
+      
+      <!-- Top Sticky Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <div class="marx-brand-logo">@Omarkez<span>_</span></div>
+        </div>
+        <div class="header-right">
+          <button id="search-trigger" class="header-icon-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </button>
+          <div class="header-profile-avatar" id="header-avatar-box"></div>
+        </div>
+      </header>
+
+      <!-- Scrollable Main Container -->
+      <div id="scroll-content" class="scroll-content">
+        
+        <!-- Home View (Dynamic Vertical Link Stack) -->
+        <div id="home-view">
+          <div id="vertical-link-container" class="vertical-link-container">
+            <!-- Dynamic vertical links will be loaded here -->
+          </div>
+        </div>
+
+        <!-- Search View -->
+        <div id="search-view" class="search-screen">
+          <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="search-input" class="search-input" placeholder="Buscar por links, LUTs, equipamentos...">
+          </div>
+          <div id="search-results" class="list-results">
+            <!-- Search items loaded by JS -->
+          </div>
+        </div>
+
+        <!-- Downloads / LUTs View -->
+        <div id="downloads-view" class="downloads-screen">
+          <div class="downloads-placeholder">
+            <div class="downloads-placeholder-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            </div>
+            <h3 class="downloads-title">Seus Materiais & Presets</h3>
+            <p class="downloads-desc">Acesse pacotes de LUTs gratuitos, guias de configuração em PDF e outros ativos direto no seu celular.</p>
+            <button id="download-trigger-btn" class="downloads-btn">Ver LUTs & Presets</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Sticky Bottom Navigation Bar -->
+      <nav class="bottom-nav">
+        <button class="nav-item active" data-tab="home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          <span class="nav-label">Início</span>
+        </button>
+        <button class="nav-item" data-tab="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span class="nav-label">Buscar</span>
+        </button>
+        <button class="nav-item" data-tab="downloads">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span class="nav-label">Downloads</span>
+        </button>
+        <button class="nav-item" data-tab="profiles">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <span class="nav-label">Perfis</span>
+        </button>
+      </nav>
+
+    </div>
+
+    <!-- 4. SUPER USER ADMIN CONTROL PANEL OVERLAY -->
+    <div id="admin-overlay" class="admin-overlay">
+      <div class="admin-header">
+        <h2 class="admin-title">Super Usuário</h2>
+        <button id="admin-close" class="admin-close-btn">&times;</button>
+      </div>
+
+      <!-- Manage Profiles (Users) CMS -->
+      <div class="admin-section">
+        <h3 class="admin-label" style="font-size: 0.85rem; margin-bottom: 12px; color: var(--text-main);">Gerenciar Perfis (Usuários)</h3>
+        
+        <label class="admin-label">Selecionar Perfil para Modificar</label>
+        <select id="admin-manage-profile-select" class="admin-select">
+          <!-- Dynamically populated profiles + [Novo Perfil] -->
+        </select>
+
+        <label class="admin-label">Nome do Perfil</label>
+        <input type="text" id="admin-profile-name" class="admin-input" placeholder="Ex: Presets Lightroom">
+
+        <label class="admin-label">Descrição (Bio)</label>
+        <input type="text" id="admin-profile-bio" class="admin-input" placeholder="Ex: Pack de presets de cor para fotos...">
+
+        <label class="admin-label">Tipo de Ícone / Avatar</label>
+        <select id="admin-profile-icon-select" class="admin-select">
+          <option value="custom">Foto Personalizada (Colar URL abaixo)</option>
+          <option value="gradient">Esquema Golden Hour / LOG Split</option>
+          <option value="phone">Ícone Mobile (Smartphone)</option>
+          <option value="camera">Ícone Câmera (DSLR)</option>
+        </select>
+
+        <label id="admin-profile-avatar-url-label" class="admin-label">URL da Imagem do Avatar</label>
+        <input type="text" id="admin-profile-avatar-url" class="admin-input" placeholder="Ex: https://images.unsplash.com/...">
+
+        <button id="admin-save-profile-btn" class="admin-btn">Salvar / Criar Perfil</button>
+        <button id="admin-delete-profile-btn" class="admin-btn admin-btn-secondary" style="margin-top: 10px; background-color: #444; display: none;">Excluir Perfil</button>
+      </div>
+
+      <!-- Select Profile to Edit Links -->
+      <div class="admin-section">
+        <label class="admin-label">Selecionar Perfil para Editar Links</label>
+        <select id="admin-profile-select" class="admin-select">
+          <!-- Dynamically populated links dropdown -->
+        </select>
+      </div>
+
+      <!-- Add New Link Form -->
+      <div class="admin-section">
+        <h3 class="admin-label" style="font-size: 0.85rem; margin-bottom: 12px; color: var(--text-main);">Adicionar Novo Link</h3>
+        
+        <label class="admin-label">Título do Link</label>
+        <input type="text" id="admin-link-title" class="admin-input" placeholder="Ex: Essential LUT Pack">
+
+        <label class="admin-label">Descrição</label>
+        <textarea id="admin-link-desc" class="admin-textarea" placeholder="Ex: Melhores cores para gravação em celular..."></textarea>
+
+        <label class="admin-label">URL do Destino</label>
+        <input type="text" id="admin-link-url" class="admin-input" placeholder="Ex: https://hotmart.com/...">
+
+        <label class="admin-label">URL da Imagem do Banner</label>
+        <input type="text" id="admin-link-banner" class="admin-input" placeholder="Ex: https://images.unsplash.com/...">
+        
+        <button id="admin-add-link-btn" class="admin-btn">Adicionar Link</button>
+      </div>
+
+      <!-- List of Links under Selected Profile -->
+      <div class="admin-section">
+        <h3 class="admin-label" style="font-size: 0.85rem; margin-bottom: 12px; color: var(--text-main);">Links Cadastrados</h3>
+        <div id="admin-links-list" class="admin-links-list">
+          <!-- Dynamically populated links -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Load script files -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
