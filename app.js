@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
           </div>`;
       } else if (profile.avatarType === "custom" && profile.avatarUrl) {
-        avatarWrapper.innerHTML = `<img class="profile-avatar" src="${profile.avatarUrl}" alt="${profile.name}">`;
+        avatarWrapper.innerHTML = `<img class="profile-avatar" src="${convertGoogleDriveLink(profile.avatarUrl)}" alt="${profile.name}">`;
       } else {
         avatarWrapper.innerHTML = `<div class="avatar-phone-style" style="background-color: #555555;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
       headerAvatarBox.classList.add("camera");
       headerAvatarBox.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>`;
     } else if (profile.avatarType === "custom" && profile.avatarUrl) {
-      headerAvatarBox.style.backgroundImage = `url('${profile.avatarUrl}')`;
+      headerAvatarBox.style.backgroundImage = `url('${convertGoogleDriveLink(profile.avatarUrl)}')`;
       headerAvatarBox.style.backgroundSize = "cover";
       headerAvatarBox.style.backgroundPosition = "center";
     } else {
@@ -379,7 +379,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const banner = document.createElement("div");
       banner.className = "link-card-banner";
       if (link.banner) {
-        banner.style.backgroundImage = `url('${link.banner}')`;
+        banner.style.backgroundImage = `url('${convertGoogleDriveLink(link.banner)}')`;
       }
       card.appendChild(banner);
       
@@ -499,7 +499,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const thumb = document.createElement("div");
       thumb.className = "result-thumb";
       if (link.banner) {
-        thumb.style.backgroundImage = `url('${link.banner}')`;
+        thumb.style.backgroundImage = `url('${convertGoogleDriveLink(link.banner)}')`;
       }
       
       const title = document.createElement("div");
@@ -713,7 +713,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const thumb = document.createElement("div");
       thumb.className = "admin-link-item-thumb";
       if (link.banner) {
-        thumb.style.backgroundImage = `url('${link.banner}')`;
+        thumb.style.backgroundImage = `url('${convertGoogleDriveLink(link.banner)}')`;
       }
       
       const title = document.createElement("div");
