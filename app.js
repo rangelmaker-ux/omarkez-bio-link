@@ -8,21 +8,26 @@ document.addEventListener("DOMContentLoaded", () => {
   // Helper to convert standard Google Drive sharing links into raw image hotlinks
   function convertGoogleDriveLink(url) {
     if (!url) return url;
-    if (url.includes("drive.google.com")) {
+    let cleanUrl = url.trim();
+    
+    if (cleanUrl.includes("drive.google.com") || cleanUrl.includes("docs.google.com")) {
       let fileId = "";
-      if (url.includes("/file/d/")) {
-        const parts = url.split("/file/d/");
-        if (parts.length > 1) {
-          fileId = parts[1].split("/")[0].split("?")[0];
-        }
-      } else if (url.includes("id=")) {
-        const parts = url.split("id=");
-        if (parts.length > 1) {
-          fileId = parts[1].split("&")[0];
+      
+      // Match /file/d/FILE_ID
+      const fileMatch = cleanUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if (fileMatch && fileMatch[1]) {
+        fileId = fileMatch[1];
+      } else {
+        // Match id=FILE_ID
+        const idMatch = cleanUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (idMatch && idMatch[1]) {
+          fileId = idMatch[1];
         }
       }
+      
       if (fileId) {
-        return `https://drive.google.com/uc?export=view&id=${fileId}`;
+        // Serve direct image stream through the Google User Content server
+        return `https://lh3.googleusercontent.com/d/${fileId}`;
       }
     }
     return url;
